@@ -8,76 +8,258 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     body { font-family: system-ui, -apple-system, sans-serif; background-color: #0f172a; color: #f8fafc; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
   </style>
 </head>
-<body class="min-h-screen pb-12">
+<body class="min-h-screen pb-24">
 
-  <!-- Header -->
+  <!-- Header & Sélecteur de Langue -->
   <header class="bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-10 shadow-lg">
     <div class="max-w-md mx-auto flex items-center justify-between">
       <div class="flex items-center gap-2">
         <span class="text-2xl">🐾</span>
         <div>
           <h1 class="font-bold text-lg text-emerald-400 leading-tight">PurrHealth</h1>
-          <p class="text-xs text-slate-400">Carnet de santé intelligent</p>
+          <p class="text-xs text-slate-400" id="sub-title">Carnet intelligent</p>
         </div>
       </div>
-      <span class="bg-emerald-500/10 text-emerald-400 text-xs px-2.5 py-1 rounded-full font-medium border border-emerald-500/20">v1.0 Online</span>
+      
+      <!-- Selecteur de langue -->
+      <select id="langSelect" onchange="changeLanguage(this.value)" class="bg-slate-800 border border-slate-700 text-xs text-slate-200 rounded-lg p-1.5 focus:ring-emerald-500">
+        <option value="fr">🇫🇷 FR</option>
+        <option value="en">🇬🇧 EN</option>
+        <option value="es">🇪🇸 ES</option>
+      </select>
     </div>
   </header>
 
   <main class="max-w-md mx-auto p-4 space-y-6">
-    
-    <!-- Hero / Bienvenue -->
-    <section class="bg-gradient-to-r from-emerald-600 to-teal-700 p-5 rounded-2xl shadow-xl">
-      <h2 class="text-xl font-bold text-white mb-1">Bienvenue sur PurrHealth ! 👋</h2>
-      <p class="text-emerald-100 text-sm">Gérez le suivi vétérinaire, les vaccins, le poids et les rappels de toute votre tribu féline.</p>
-    </section>
 
-    <!-- Quick Actions -->
-    <section class="grid grid-cols-2 gap-3">
-      <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700/50 flex flex-col items-center text-center">
-        <i data-lucide="cat" class="w-8 h-8 text-emerald-400 mb-2"></i>
-        <span class="font-semibold text-sm">Mes Chats</span>
-        <span class="text-xs text-slate-400 mt-1">Gérer les profils</span>
-      </div>
-      <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700/50 flex flex-col items-center text-center">
-        <i data-lucide="calendar" class="w-8 h-8 text-teal-400 mb-2"></i>
-        <span class="font-semibold text-sm">Rappels</span>
-        <span class="text-xs text-slate-400 mt-1">Vaccins & Soins</span>
-      </div>
-      <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700/50 flex flex-col items-center text-center">
-        <i data-lucide="weight" class="w-8 h-8 text-cyan-400 mb-2"></i>
-        <span class="font-semibold text-sm">Courbe de Poids</span>
-        <span class="text-xs text-slate-400 mt-1">Suivi mensuel</span>
-      </div>
-      <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700/50 flex flex-col items-center text-center">
-        <i data-lucide="file-text" class="w-8 h-8 text-indigo-400 mb-2"></i>
-        <span class="font-semibold text-sm">Ordonnances</span>
-        <span class="text-xs text-slate-400 mt-1">Documents vété.</span>
-      </div>
-    </section>
+    <!-- ONGLET 1 : ACCUEIL / DASHBOARD -->
+    <div id="tab-home" class="tab-content active space-y-5">
+      <section class="bg-gradient-to-r from-emerald-600 to-teal-700 p-5 rounded-2xl shadow-xl">
+        <h2 class="text-xl font-bold text-white mb-1" id="welcome-title">Bienvenue sur PurrHealth ! 👋</h2>
+        <p class="text-emerald-100 text-sm" id="welcome-desc">Gérez la santé, les vaccins, le poids et le suivi de vos chats en un instant.</p>
+      </section>
 
-    <!-- Status Card -->
-    <section class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-      <h3 class="font-semibold text-slate-200 mb-3 flex items-center gap-2">
-        <i data-lucide="bell" class="w-4 h-4 text-emerald-400"></i> Prochains événements
-      </h3>
-      <div class="space-y-2 text-sm">
-        <div class="p-3 bg-slate-900/50 rounded-lg border border-slate-700/30 flex justify-between items-center">
-          <div>
-            <p class="font-medium text-slate-200">Vaccin Rappel (Typhus/Coryza)</p>
-            <p class="text-xs text-slate-400">Chaton / Portée</p>
+      <!-- Raccourci Scanner IA -->
+      <div onclick="switchTab('ai')" class="cursor-pointer bg-slate-800/90 hover:bg-slate-800 border border-emerald-500/30 p-4 rounded-xl flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 bg-emerald-500/10 rounded-xl text-emerald-400">
+            <i data-lucide="sparkles" class="w-6 h-6"></i>
           </div>
-          <span class="text-xs bg-amber-500/10 text-amber-400 px-2 py-1 rounded">À planifier</span>
+          <div>
+            <h3 class="font-bold text-sm text-slate-200" id="quick-ai-title">Scanner IA Photo</h3>
+            <p class="text-xs text-slate-400" id="quick-ai-desc">Analyse d'ordonnance ou de chat</p>
+          </div>
+        </div>
+        <i data-lucide="chevron-right" class="w-5 h-5 text-slate-500"></i>
+      </div>
+
+      <!-- Prochains événements -->
+      <section class="bg-slate-800 p-4 rounded-xl border border-slate-700 space-y-3">
+        <h3 class="font-semibold text-slate-200 text-sm flex items-center gap-2" id="events-title">
+          <i data-lucide="bell" class="w-4 h-4 text-emerald-400"></i> Rappels à venir
+        </h3>
+        <div class="p-3 bg-slate-900/60 rounded-lg border border-slate-700/50 flex justify-between items-center text-sm">
+          <div>
+            <p class="font-medium text-slate-200">Rappel Vaccin (Typhus/Coryza)</p>
+            <p class="text-xs text-slate-400">Suivi recommandé</p>
+          </div>
+          <span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded-md" id="status-ok">À jour</span>
+        </div>
+      </section>
+    </div>
+
+    <!-- ONGLET 2 : CHATS / MES CHATS -->
+    <div id="tab-cats" class="tab-content space-y-4">
+      <div class="flex justify-between items-center">
+        <h2 class="text-lg font-bold text-slate-100" id="cats-heading">Mes Chats</h2>
+        <button onclick="alert('Fonctionnalité d\'ajout de chat très bientôt !')" class="bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-lg flex items-center gap-1 font-medium">
+          <i data-lucide="plus" class="w-4 h-4"></i> <span id="btn-add-cat">Ajouter</span>
+        </button>
+      </div>
+
+      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-slate-700 rounded-full flex items-center justify-center text-xl">🐱</div>
+          <div>
+            <h3 class="font-bold text-slate-200">Mon Chat 1</h3>
+            <p class="text-xs text-slate-400">Race non spécifiée • 4.2 kg</p>
+          </div>
+        </div>
+        <span class="text-xs bg-slate-700 text-slate-300 px-2 py-1 rounded">Profil</span>
+      </div>
+    </div>
+
+    <!-- ONGLET 3 : SCANNER IA -->
+    <div id="tab-ai" class="tab-content space-y-5">
+      <div class="bg-gradient-to-br from-slate-800 to-slate-900 border border-emerald-500/20 p-5 rounded-2xl space-y-4">
+        <div class="flex items-center gap-2 text-emerald-400">
+          <i data-lucide="sparkles" class="w-5 h-5"></i>
+          <h2 class="font-bold text-base" id="ai-tab-title">Scanner Intelligent IA</h2>
+        </div>
+        <p class="text-xs text-slate-300 leading-relaxed" id="ai-tab-desc">
+          Prenez en photo une ordonnance, une étiquette de vaccin ou votre chat. L'IA va analyser le document ou le visuel pour créer un rappel automatique.
+        </p>
+
+        <!-- Zone d'import photo -->
+        <div class="border-2 border-dashed border-slate-700 hover:border-emerald-500/50 bg-slate-900/50 p-6 rounded-xl flex flex-col items-center justify-center text-center gap-2 transition cursor-pointer">
+          <i data-lucide="camera" class="w-8 h-8 text-emerald-400 mb-1"></i>
+          <span class="text-sm font-medium text-slate-200" id="ai-upload-btn">Prendre une photo / Choisir un fichier</span>
+          <span class="text-xs text-slate-500">Formats acceptés: JPG, PNG</span>
         </div>
       </div>
-    </section>
+    </div>
+
+    <!-- ONGLET 4 : POIDS & SUIVI -->
+    <div id="tab-weight" class="tab-content space-y-4">
+      <h2 class="text-lg font-bold text-slate-100" id="weight-heading">Suivi de Poids & Santé</h2>
+      <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 text-center space-y-3">
+        <i data-lucide="scale" class="w-10 h-10 text-cyan-400 mx-auto"></i>
+        <p class="text-xs text-slate-300" id="weight-desc">Enregistrez régulièrement le poids de vos chats pour voir leur courbe d'évolution.</p>
+        <button class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-medium py-2 rounded-lg text-sm transition" id="btn-add-weight">
+          Saisir une pesée
+        </button>
+      </div>
+    </div>
 
   </main>
 
+  <!-- Navigation Flottante du bas (Bottom Bar) -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur border-t border-slate-800 p-2 z-20">
+    <div class="max-w-md mx-auto grid grid-cols-4 gap-1">
+      <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center justify-center p-2 text-emerald-400 font-medium">
+        <i data-lucide="home" class="w-5 h-5 mb-1"></i>
+        <span class="text-[10px]" id="nav-lbl-home">Accueil</span>
+      </button>
+
+      <button onclick="switchTab('cats')" id="nav-cats" class="flex flex-col items-center justify-center p-2 text-slate-400">
+        <i data-lucide="cat" class="w-5 h-5 mb-1"></i>
+        <span class="text-[10px]" id="nav-lbl-cats">Chats</span>
+      </button>
+
+      <button onclick="switchTab('ai')" id="nav-ai" class="flex flex-col items-center justify-center p-2 text-slate-400">
+        <i data-lucide="sparkles" class="w-5 h-5 mb-1"></i>
+        <span class="text-[10px]" id="nav-lbl-ai">Scanner IA</span>
+      </button>
+
+      <button onclick="switchTab('weight')" id="nav-weight" class="flex flex-col items-center justify-center p-2 text-slate-400">
+        <i data-lucide="scale" class="w-5 h-5 mb-1"></i>
+        <span class="text-[10px]" id="nav-lbl-weight">Poids</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Script Navigation & Multi-Langues -->
   <script>
     lucide.createIcons();
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + tabId).classList.add('active');
+
+      const tabs = ['home', 'cats', 'ai', 'weight'];
+      tabs.forEach(t => {
+        const navBtn = document.getElementById('nav-' + t);
+        if (t === tabId) {
+          navBtn.className = 'flex flex-col items-center justify-center p-2 text-emerald-400 font-medium';
+        } else {
+          navBtn.className = 'flex flex-col items-center justify-center p-2 text-slate-400';
+        }
+      });
+    }
+
+    const translations = {
+      fr: {
+        subTitle: "Carnet intelligent",
+        welcomeTitle: "Bienvenue sur PurrHealth ! 👋",
+        welcomeDesc: "Gérez la santé, les vaccins, le poids et le suivi de vos chats en un instant.",
+        quickAiTitle: "Scanner IA Photo",
+        quickAiDesc: "Analyse d'ordonnance ou de chat",
+        eventsTitle: "Rappels à venir",
+        statusOk: "À jour",
+        catsHeading: "Mes Chats",
+        btnAddCat: "Ajouter",
+        aiTabTitle: "Scanner Intelligent IA",
+        aiTabDesc: "Prenez en photo une ordonnance, une étiquette de vaccin ou votre chat. L'IA va analyser le document ou le visuel pour créer un rappel automatique.",
+        aiUploadBtn: "Prendre une photo / Choisir un fichier",
+        weightHeading: "Suivi de Poids & Santé",
+        weightDesc: "Enregistrez régulièrement le poids de vos chats pour voir leur courbe d'évolution.",
+        btnAddWeight: "Saisir une pesée",
+        navHome: "Accueil",
+        navCats: "Chats",
+        navAi: "Scanner IA",
+        navWeight: "Poids"
+      },
+      en: {
+        subTitle: "Smart healthbook",
+        welcomeTitle: "Welcome to PurrHealth! 👋",
+        welcomeDesc: "Manage your cats' health, vaccines, weight, and reminders effortlessly.",
+        quickAiTitle: "AI Photo Scanner",
+        quickAiDesc: "Prescription or cat photo analysis",
+        eventsTitle: "Upcoming Reminders",
+        statusOk: "Up to date",
+        catsHeading: "My Cats",
+        btnAddCat: "Add Cat",
+        aiTabTitle: "AI Smart Scanner",
+        aiTabDesc: "Take a photo of a prescription, vaccine label, or your cat. AI will analyze it to set up automatic reminders.",
+        aiUploadBtn: "Take photo / Upload file",
+        weightHeading: "Weight & Health Tracker",
+        weightDesc: "Track your cats' weight regularly to monitor their growth curve.",
+        btnAddWeight: "Add Weight Log",
+        navHome: "Home",
+        navCats: "Cats",
+        navAi: "AI Scanner",
+        navWeight: "Weight"
+      },
+      es: {
+        subTitle: "Cartilla inteligente",
+        welcomeTitle: "¡Bienvenido a PurrHealth! 👋",
+        welcomeDesc: "Gestione la salud, vacunas, peso y recordatorios de sus gatos de forma sencilla.",
+        quickAiTitle: "Escáner IA Fotos",
+        quickAiDesc: "Análisis de recetas o fotos de gatos",
+        eventsTitle: "Próximos Recordatorios",
+        statusOk: "Al día",
+        catsHeading: "Mis Gatos",
+        btnAddCat: "Añadir",
+        aiTabTitle: "Escáner Inteligente IA",
+        aiTabDesc: "Tome una foto de una receta, vacuna o de su gato. La IA lo analizará para crear recordatorios automáticos.",
+        aiUploadBtn: "Tomar foto / Subir archivo",
+        weightHeading: "Control de Peso y Salud",
+        weightDesc: "Registre el peso regularmente para ver la curva de crecimiento.",
+        btnAddWeight: "Registrar peso",
+        navHome: "Inicio",
+        navCats: "Gatos",
+        navAi: "Escáner IA",
+        navWeight: "Peso"
+      }
+    };
+
+    function changeLanguage(lang) {
+      const t = translations[lang] || translations.fr;
+      document.getElementById('sub-title').innerText = t.subTitle;
+      document.getElementById('welcome-title').innerText = t.welcomeTitle;
+      document.getElementById('welcome-desc').innerText = t.welcomeDesc;
+      document.getElementById('quick-ai-title').innerText = t.quickAiTitle;
+      document.getElementById('quick-ai-desc').innerText = t.quickAiDesc;
+      document.getElementById('events-title').innerHTML = `<i data-lucide="bell" class="w-4 h-4 text-emerald-400"></i> ${t.eventsTitle}`;
+      document.getElementById('status-ok').innerText = t.statusOk;
+      document.getElementById('cats-heading').innerText = t.catsHeading;
+      document.getElementById('btn-add-cat').innerText = t.btnAddCat;
+      document.getElementById('ai-tab-title').innerText = t.aiTabTitle;
+      document.getElementById('ai-tab-desc').innerText = t.aiTabDesc;
+      document.getElementById('ai-upload-btn').innerText = t.aiUploadBtn;
+      document.getElementById('weight-heading').innerText = t.weightHeading;
+      document.getElementById('weight-desc').innerText = t.weightDesc;
+      document.getElementById('btn-add-weight').innerText = t.btnAddWeight;
+      document.getElementById('nav-lbl-home').innerText = t.navHome;
+      document.getElementById('nav-lbl-cats').innerText = t.navCats;
+      document.getElementById('nav-lbl-ai').innerText = t.navAi;
+      document.getElementById('nav-lbl-weight').innerText = t.navWeight;
+      lucide.createIcons();
+    }
   </script>
 </body>
 </html>
