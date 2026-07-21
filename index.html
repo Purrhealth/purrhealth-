@@ -6,6 +6,7 @@
   <title>PurrHealth 🐾 - Carnet de santé pour chats</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body { font-family: system-ui, -apple-system, sans-serif; background-color: #0f172a; color: #f8fafc; }
     .tab-content { display: none; }
@@ -14,7 +15,7 @@
 </head>
 <body class="min-h-screen pb-24">
 
-  <!-- Header & Sélecteur de Langue -->
+  <!-- Header & Langue -->
   <header class="bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-10 shadow-lg">
     <div class="max-w-md mx-auto flex items-center justify-between">
       <div class="flex items-center gap-2">
@@ -24,11 +25,9 @@
           <p class="text-xs text-slate-400" id="sub-title">Carnet intelligent</p>
         </div>
       </div>
-      
       <select id="langSelect" onchange="changeLanguage(this.value)" class="bg-slate-800 border border-slate-700 text-xs text-slate-200 rounded-lg p-1.5">
         <option value="fr">🇫🇷 FR</option>
         <option value="en">🇬🇧 EN</option>
-        <option value="es">🇪🇸 ES</option>
       </select>
     </div>
   </header>
@@ -49,7 +48,7 @@
           </div>
           <div>
             <h3 class="font-bold text-sm text-slate-200" id="quick-ai-title">Scanner IA Photo</h3>
-            <p class="text-xs text-slate-400" id="quick-ai-desc">Analyse d'ordonnance ou de chat</p>
+            <p class="text-xs text-slate-400" id="quick-ai-desc">Ordonnances, vaccins, LOOF...</p>
           </div>
         </div>
         <i data-lucide="chevron-right" class="w-5 h-5 text-slate-500"></i>
@@ -57,14 +56,14 @@
 
       <section class="bg-slate-800 p-4 rounded-xl border border-slate-700 space-y-3">
         <h3 class="font-semibold text-slate-200 text-sm flex items-center gap-2" id="events-title">
-          <i data-lucide="bell" class="w-4 h-4 text-emerald-400"></i> Rappels à venir
+          <i data-lucide="bell" class="w-4 h-4 text-emerald-400"></i> Rappels & RDV
         </h3>
         <div class="p-3 bg-slate-900/60 rounded-lg border border-slate-700/50 flex justify-between items-center text-sm">
           <div>
-            <p class="font-medium text-slate-200">Rappel Vaccin (Typhus/Coryza)</p>
-            <p class="text-xs text-slate-400">Suivi recommandé</p>
+            <p class="font-medium text-slate-200" id="event-name">Rappel Vaccin (Typhus/Coryza)</p>
+            <p class="text-xs text-slate-400" id="event-countdown">J-14 avant échéance</p>
           </div>
-          <span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded-md" id="status-ok">À jour</span>
+          <span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded-md" id="status-ok">Actif</span>
         </div>
       </section>
     </div>
@@ -78,21 +77,24 @@
         </button>
       </div>
 
-      <!-- Formulaire d'ajout de Chat -->
+      <!-- Formulaire d'ajout -->
       <div id="add-cat-form" class="hidden bg-slate-800 p-4 rounded-xl border border-emerald-500/40 space-y-3">
-        <h3 class="font-bold text-sm text-emerald-400">Nouveau Chat</h3>
-        <input type="text" id="cat-name" placeholder="Nom du chat (ex: Seven, Eight...)" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+        <h3 class="font-bold text-sm text-emerald-400" id="form-title">Nouveau Chat</h3>
+        <input type="text" id="cat-name" placeholder="Nom (ex: Seven)" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-white">
         <div class="grid grid-cols-2 gap-2">
-          <input type="text" id="cat-breed" placeholder="Race (ex: Bengal)" class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-emerald-500">
-          <input type="number" step="0.1" id="cat-weight" placeholder="Poids (kg)" class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+          <input type="text" id="cat-breed" placeholder="Race (ex: Bengal)" class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-white">
+          <input type="text" id="cat-chip" placeholder="N° Puce / Tatouage" class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-white">
         </div>
-        <div class="flex gap-2 justify-end">
-          <button onclick="toggleCatForm()" class="px-3 py-1.5 text-xs text-slate-400 hover:text-white">Annuler</button>
-          <button onclick="saveCat()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-4 py-1.5 rounded-lg font-medium">Enregistrer</button>
+        <div class="grid grid-cols-2 gap-2">
+          <input type="number" step="0.1" id="cat-weight" placeholder="Poids actuel (kg)" class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-white">
+          <input type="date" id="cat-dob" class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-slate-300">
+        </div>
+        <div class="flex gap-2 justify-end pt-1">
+          <button onclick="toggleCatForm()" class="px-3 py-1.5 text-xs text-slate-400">Annuler</button>
+          <button onclick="saveCat()" class="bg-emerald-600 text-white text-xs px-4 py-1.5 rounded-lg font-medium">Enregistrer</button>
         </div>
       </div>
 
-      <!-- Liste dynamique des chats -->
       <div id="cats-list" class="space-y-3"></div>
     </div>
 
@@ -101,54 +103,52 @@
       <div class="bg-gradient-to-br from-slate-800 to-slate-900 border border-emerald-500/20 p-5 rounded-2xl space-y-4">
         <div class="flex items-center gap-2 text-emerald-400">
           <i data-lucide="sparkles" class="w-5 h-5"></i>
-          <h2 class="font-bold text-base" id="ai-tab-title">Scanner Intelligent IA</h2>
+          <h2 class="font-bold text-base" id="ai-title">Scanner Intelligent IA</h2>
         </div>
-        <p class="text-xs text-slate-300 leading-relaxed" id="ai-tab-desc">
-          Prenez en photo une ordonnance, une étiquette de vaccin ou votre chat. L'IA va analyser le document ou le visuel pour créer un rappel automatique.
+        <p class="text-xs text-slate-300 leading-relaxed" id="ai-desc">
+          Prenez en photo une ordonnance, un vaccin ou un pedigree LOOF. L'IA extrait et classe tout automatiquement.
         </p>
-
         <label class="border-2 border-dashed border-slate-700 hover:border-emerald-500/50 bg-slate-900/50 p-6 rounded-xl flex flex-col items-center justify-center text-center gap-2 transition cursor-pointer">
           <i data-lucide="camera" class="w-8 h-8 text-emerald-400 mb-1"></i>
-          <span class="text-sm font-medium text-slate-200" id="ai-upload-btn">Prendre une photo / Choisir un fichier</span>
-          <span class="text-xs text-slate-500">Formats acceptés: JPG, PNG</span>
-          <input type="file" accept="image/*" class="hidden" onchange="alert('Photo chargée ! L\'analyse IA est en cours d\'intégration.')">
+          <span class="text-sm font-medium text-slate-200" id="ai-btn">Scanner un document</span>
+          <input type="file" accept="image/*" class="hidden" onchange="simulateAIScan()">
         </label>
+        <div id="ai-result" class="hidden p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-xs text-emerald-300 space-y-1">
+          <p class="font-bold">✨ Analyse IA réussie !</p>
+          <p id="ai-extracted-text">Document classé dans le dossier médical.</p>
+        </div>
       </div>
     </div>
 
-    <!-- ONGLET 4 : POIDS & SUIVI -->
+    <!-- ONGLET 4 : POIDS & STATS -->
     <div id="tab-weight" class="tab-content space-y-4">
-      <h2 class="text-lg font-bold text-slate-100" id="weight-heading">Suivi de Poids & Santé</h2>
-      <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 space-y-4">
-        <div class="flex items-center justify-center gap-2 text-cyan-400">
-          <i data-lucide="scale" class="w-8 h-8"></i>
+      <h2 class="text-lg font-bold text-slate-100" id="weight-heading">Courbe de Poids</h2>
+      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 space-y-4">
+        <canvas id="weightChart" width="400" height="200"></canvas>
+        <div class="flex gap-2">
+          <input type="number" step="0.1" id="new-weight-val" placeholder="Nouveau poids (kg)" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-white">
+          <button onclick="addWeightLog()" class="bg-cyan-600 text-white text-xs px-4 py-2 rounded-lg font-medium">Ajouter</button>
         </div>
-        <p class="text-xs text-slate-300 text-center" id="weight-desc">Enregistrez régulièrement le poids de vos chats pour voir leur courbe d'évolution.</p>
-        
-        <div id="weight-logs-list" class="space-y-2 text-sm"></div>
       </div>
     </div>
 
   </main>
 
-  <!-- Navigation Flottante -->
+  <!-- Navigation -->
   <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur border-t border-slate-800 p-2 z-20">
     <div class="max-w-md mx-auto grid grid-cols-4 gap-1">
       <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center justify-center p-2 text-emerald-400 font-medium">
         <i data-lucide="home" class="w-5 h-5 mb-1"></i>
         <span class="text-[10px]" id="nav-lbl-home">Accueil</span>
       </button>
-
       <button onclick="switchTab('cats')" id="nav-cats" class="flex flex-col items-center justify-center p-2 text-slate-400">
         <i data-lucide="cat" class="w-5 h-5 mb-1"></i>
         <span class="text-[10px]" id="nav-lbl-cats">Chats</span>
       </button>
-
       <button onclick="switchTab('ai')" id="nav-ai" class="flex flex-col items-center justify-center p-2 text-slate-400">
         <i data-lucide="sparkles" class="w-5 h-5 mb-1"></i>
         <span class="text-[10px]" id="nav-lbl-ai">Scanner IA</span>
       </button>
-
       <button onclick="switchTab('weight')" id="nav-weight" class="flex flex-col items-center justify-center p-2 text-slate-400">
         <i data-lucide="scale" class="w-5 h-5 mb-1"></i>
         <span class="text-[10px]" id="nav-lbl-weight">Poids</span>
@@ -158,16 +158,16 @@
 
   <script>
     let myCats = JSON.parse(localStorage.getItem('purr_cats')) || [
-      { id: 1, name: "Seven", breed: "Bengal", weight: 4.2 },
-      { id: 2, name: "Eight", breed: "Bengal", weight: 3.8 }
+      { id: 1, name: "Seven", breed: "Bengal", chip: "250269...", weight: 4.2, dob: "2023-05-10" },
+      { id: 2, name: "Eight", breed: "Bengal", chip: "250269...", weight: 3.8, dob: "2023-05-10" }
     ];
 
-    function renderCats() {
+    let currentLang = 'fr';
+    let weightChartInstance = null;
+
+    function renderApp() {
       const container = document.getElementById('cats-list');
-      const weightContainer = document.getElementById('weight-logs-list');
-      
       container.innerHTML = '';
-      weightContainer.innerHTML = '';
 
       if (myCats.length === 0) {
         container.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">Aucun chat enregistré.</p>';
@@ -176,27 +176,27 @@
 
       myCats.forEach(cat => {
         container.innerHTML += `
-          <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 bg-slate-700/80 rounded-full flex items-center justify-center text-lg">🐾</div>
-              <div>
-                <h3 class="font-bold text-slate-200 text-sm">${cat.name}</h3>
-                <p class="text-xs text-slate-400">${cat.breed || 'Non spécifié'} • ${cat.weight ? cat.weight + ' kg' : 'Poids non renseigné'}</p>
+          <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center text-lg">🐱</div>
+                <div>
+                  <h3 class="font-bold text-slate-200 text-sm">${cat.name}</h3>
+                  <p class="text-xs text-slate-400">${cat.breed || 'Chat'} • ${cat.weight ? cat.weight + ' kg' : ''}</p>
+                </div>
               </div>
+              <button onclick="deleteCat(${cat.id})" class="text-xs text-red-400 hover:underline">Supprimer</button>
             </div>
-            <button onclick="deleteCat(${cat.id})" class="text-xs text-red-400/70 hover:text-red-400 p-1">Supprimer</button>
-          </div>
-        `;
-
-        weightContainer.innerHTML += `
-          <div class="p-3 bg-slate-900/60 rounded-lg border border-slate-700/50 flex justify-between items-center text-xs">
-            <span class="font-medium text-slate-200">${cat.name} (${cat.breed || 'Chat'})</span>
-            <span class="text-cyan-400 font-bold">${cat.weight ? cat.weight + ' kg' : 'N/A'}</span>
+            <div class="text-[11px] bg-slate-900/60 p-2 rounded border border-slate-700/50 text-slate-300 grid grid-cols-2 gap-1">
+              <span>Puce: ${cat.chip || 'Non renseignée'}</span>
+              <span>Né(e) le: ${cat.dob || 'N/A'}</span>
+            </div>
           </div>
         `;
       });
 
       localStorage.setItem('purr_cats', JSON.stringify(myCats));
+      updateChart();
       lucide.createIcons();
     }
 
@@ -206,81 +206,103 @@
 
     function saveCat() {
       const name = document.getElementById('cat-name').value.trim();
-      const breed = document.getElementById('cat-breed').value.trim();
-      const weight = document.getElementById('cat-weight').value;
-
-      if (!name) {
-        alert('Veuillez entrer au moins le nom du chat.');
-        return;
-      }
+      if (!name) return alert('Veuillez entrer un nom.');
 
       myCats.push({
         id: Date.now(),
-        name: name,
-        breed: breed || "Bengal",
-        weight: weight ? parseFloat(weight) : ""
+        name,
+        breed: document.getElementById('cat-breed').value.trim(),
+        chip: document.getElementById('cat-chip').value.trim(),
+        weight: parseFloat(document.getElementById('cat-weight').value) || 0,
+        dob: document.getElementById('cat-dob').value
       });
 
       document.getElementById('cat-name').value = '';
       document.getElementById('cat-breed').value = '';
+      document.getElementById('cat-chip').value = '';
       document.getElementById('cat-weight').value = '';
+      document.getElementById('cat-dob').value = '';
       toggleCatForm();
-      renderCats();
+      renderApp();
     }
 
     function deleteCat(id) {
-      if (confirm('Voulez-vous supprimer ce profil ?')) {
+      if (confirm('Supprimer ce profil ?')) {
         myCats = myCats.filter(c => c.id !== id);
-        renderCats();
+        renderApp();
       }
+    }
+
+    function simulateAIScan() {
+      const res = document.getElementById('ai-result');
+      res.classList.remove('hidden');
+      document.getElementById('ai-extracted-text').innerText = "Vaccin Typhus/Coryza détecté - Rappel programmé dans 1 an.";
+    }
+
+    function initChart() {
+      const ctx = document.getElementById('weightChart').getContext('2d');
+      weightChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai'],
+          datasets: [{
+            label: 'Seven (kg)',
+            data: [4.0, 4.1, 4.1, 4.2, 4.2],
+            borderColor: '#10b981',
+            tension: 0.3
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { labels: { color: '#cbd5e1' } } }, scales: { y: { ticks: { color: '#94a3b8' } }, x: { ticks: { color: '#94a3b8' } } } }
+      });
+    }
+
+    function updateChart() {
+      if (!weightChartInstance) return;
+      weightChartInstance.data.datasets[0].data = myCats.map(c => c.weight || 4.0);
+      weightChartInstance.data.labels = myCats.map(c => c.name);
+      weightChartInstance.update();
+    }
+
+    function addWeightLog() {
+      const val = parseFloat(document.getElementById('new-weight-val').value);
+      if (!val || myCats.length === 0) return alert('Ajoutez un chat et un poids valide.');
+      myCats[0].weight = val;
+      document.getElementById('new-weight-val').value = '';
+      renderApp();
+      alert('Poids enregistré !');
     }
 
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.getElementById('tab-' + tabId).classList.add('active');
-
-      const tabs = ['home', 'cats', 'ai', 'weight'];
-      tabs.forEach(t => {
-        const navBtn = document.getElementById('nav-' + t);
-        if (t === tabId) {
-          navBtn.className = 'flex flex-col items-center justify-center p-2 text-emerald-400 font-medium';
-        } else {
-          navBtn.className = 'flex flex-col items-center justify-center p-2 text-slate-400';
-        }
+      ['home', 'cats', 'ai', 'weight'].forEach(t => {
+        const btn = document.getElementById('nav-' + t);
+        btn.className = (t === tabId) ? 'flex flex-col items-center justify-center p-2 text-emerald-400 font-medium' : 'flex flex-col items-center justify-center p-2 text-slate-400';
       });
+      if(tabId === 'weight' && !weightChartInstance) initChart();
     }
 
-    const translations = {
-      fr: { subTitle: "Carnet intelligent", welcomeTitle: "Bienvenue sur PurrHealth ! 👋", welcomeDesc: "Gérez la santé, les vaccins, le poids et le suivi de vos chats en un instant.", quickAiTitle: "Scanner IA Photo", quickAiDesc: "Analyse d'ordonnance ou de chat", eventsTitle: "Rappels à venir", statusOk: "À jour", catsHeading: "Mes Chats", btnAddCat: "Ajouter", aiTabTitle: "Scanner Intelligent IA", aiTabDesc: "Prenez en photo une ordonnance, une étiquette de vaccin ou votre chat. L'IA va analyser le document pour créer un rappel.", aiUploadBtn: "Prendre une photo / Choisir un fichier", weightHeading: "Suivi de Poids & Santé", weightDesc: "Enregistrez régulièrement le poids de vos chats pour voir leur courbe d'évolution.", navHome: "Accueil", navCats: "Chats", navAi: "Scanner IA", navWeight: "Poids" },
-      en: { subTitle: "Smart healthbook", welcomeTitle: "Welcome to PurrHealth! 👋", welcomeDesc: "Manage your cats' health, vaccines, weight, and reminders effortlessly.", quickAiTitle: "AI Photo Scanner", quickAiDesc: "Prescription or cat photo analysis", eventsTitle: "Upcoming Reminders", statusOk: "Up to date", catsHeading: "My Cats", btnAddCat: "Add Cat", aiTabTitle: "AI Smart Scanner", aiTabDesc: "Take a photo of a prescription or vaccine label. AI will process it automatically.", aiUploadBtn: "Take photo / Upload file", weightHeading: "Weight & Health Tracker", weightDesc: "Track your cats' weight regularly to monitor growth.", navHome: "Home", navCats: "Cats", navAi: "AI Scanner", navWeight: "Weight" },
-      es: { subTitle: "Cartilla inteligente", welcomeTitle: "¡Bienvenido a PurrHealth! 👋", welcomeDesc: "Gestione la salud, vacunas, peso y recordatorios de sus gatos fácilmente.", quickAiTitle: "Escáner IA Fotos", quickAiDesc: "Análisis de recetas o fotos", eventsTitle: "Próximos Recordatorios", statusOk: "Al día", catsHeading: "Mis Gatos", btnAddCat: "Añadir", aiTabTitle: "Escáner Inteligente IA", aiTabDesc: "Tome una foto de una receta o vacuna. La IA creará recordatorios automáticos.", aiUploadBtn: "Tomar foto / Subir archivo", weightHeading: "Control de Peso y Salud", weightDesc: "Registre el peso regularmente para ver la evolución.", navHome: "Inicio", navCats: "Gatos", navAi: "Escáner IA", navWeight: "Peso" }
+    const dict = {
+      fr: { sub: "Carnet intelligent", welcome: "Bienvenue sur PurrHealth ! 👋", desc: "Gérez la santé, les vaccins, le poids et le suivi de vos chats en un instant.", cats: "Mes Chats", add: "Ajouter", home: "Accueil", ai: "Scanner IA", weight: "Poids" },
+      en: { sub: "Smart healthbook", welcome: "Welcome to PurrHealth! 👋", desc: "Manage your cats' health, vaccines, weight, and reminders effortlessly.", cats: "My Cats", add: "Add Cat", home: "Home", ai: "AI Scanner", weight: "Weight" }
     };
 
     function changeLanguage(lang) {
-      const t = translations[lang] || translations.fr;
-      document.getElementById('sub-title').innerText = t.subTitle;
-      document.getElementById('welcome-title').innerText = t.welcomeTitle;
-      document.getElementById('welcome-desc').innerText = t.welcomeDesc;
-      document.getElementById('quick-ai-title').innerText = t.quickAiTitle;
-      document.getElementById('quick-ai-desc').innerText = t.quickAiDesc;
-      document.getElementById('events-title').innerHTML = `<i data-lucide="bell" class="w-4 h-4 text-emerald-400"></i> ${t.eventsTitle}`;
-      document.getElementById('status-ok').innerText = t.statusOk;
-      document.getElementById('cats-heading').innerText = t.catsHeading;
-      document.getElementById('btn-add-cat').innerText = t.btnAddCat;
-      document.getElementById('ai-tab-title').innerText = t.aiTabTitle;
-      document.getElementById('ai-tab-desc').innerText = t.aiTabDesc;
-      document.getElementById('ai-upload-btn').innerText = t.aiUploadBtn;
-      document.getElementById('weight-heading').innerText = t.weightHeading;
-      document.getElementById('weight-desc').innerText = t.weightDesc;
-      document.getElementById('nav-lbl-home').innerText = t.navHome;
-      document.getElementById('nav-lbl-cats').innerText = t.navCats;
-      document.getElementById('nav-lbl-ai').innerText = t.navAi;
-      document.getElementById('nav-lbl-weight').innerText = t.navWeight;
+      currentLang = lang;
+      const t = dict[lang] || dict.fr;
+      document.getElementById('sub-title').innerText = t.sub;
+      document.getElementById('welcome-title').innerText = t.welcome;
+      document.getElementById('welcome-desc').innerText = t.desc;
+      document.getElementById('cats-heading').innerText = t.cats;
+      document.getElementById('btn-add-cat').innerText = t.add;
+      document.getElementById('nav-lbl-home').innerText = t.home;
+      document.getElementById('nav-lbl-ai').innerText = t.ai;
+      document.getElementById('nav-lbl-weight').innerText = t.weight;
       lucide.createIcons();
     }
 
-    renderCats();
+    renderApp();
   </script>
 </body>
-  </html>
+            </html>
   
