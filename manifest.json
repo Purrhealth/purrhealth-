@@ -1,0 +1,13 @@
+{
+  "name": "PurrHealth",
+  "short_name": "PurrHealth",
+  "icons": [
+    {
+      "src": "1784651243542.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone"
+}
