@@ -6,7 +6,7 @@
   <title>PurrHealth 🐾 - Carnet de santé pour chats</title>
   <link rel="icon" type="image/jpeg" href="1784651243542.jpg">
   <link rel="apple-touch-icon" href="1784651243542.jpg">
-  
+  <link rel="manifest" href="manifest.json">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -23,8 +23,7 @@
   <header class="bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-10 shadow-lg">
     <div class="max-w-md mx-auto flex items-center justify-between">
       <div class="flex items-center gap-2">
-<img src="1784651243542.jpg" alt="Logo" class="h-8">
-        
+        <img src="1784651243542.jpg" alt="Logo" class="h-8 rounded-md">
         <span class="text-2xl">🐾</span>
         <div>
           <h1 class="font-bold text-lg text-emerald-400 leading-tight">PurrHealth</h1>
@@ -250,10 +249,10 @@
       weightChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai'],
+          labels: myCats.map(c => c.name),
           datasets: [{
-            label: 'Seven (kg)',
-            data: [4.0, 4.1, 4.1, 4.2, 4.2],
+            label: 'Poids (kg)',
+            data: myCats.map(c => c.weight || 4.0),
             borderColor: '#10b981',
             tension: 0.3
           }]
@@ -302,6 +301,7 @@
       document.getElementById('cats-heading').innerText = t.cats;
       document.getElementById('btn-add-cat').innerText = t.add;
       document.getElementById('nav-lbl-home').innerText = t.home;
+      document.getElementById('nav-lbl-cats').innerText = t.cats;
       document.getElementById('nav-lbl-ai').innerText = t.ai;
       document.getElementById('nav-lbl-weight').innerText = t.weight;
       lucide.createIcons();
@@ -310,5 +310,4 @@
     renderApp();
   </script>
 </body>
-            </html>
-  
+</html>
