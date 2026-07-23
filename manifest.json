@@ -3,7 +3,8 @@
   "short_name": "PurrHealth",
   "icons": [
     {
-      "src": "1784651243542.jpg",
+            "src": "Seven_20260723_151853_0000.png",
+      
       "sizes": "512x512",
       "type": "image/jpeg"
     }
